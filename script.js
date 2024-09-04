@@ -1,78 +1,86 @@
-let booklist=[]
-let currentPage=1
-let itemsPerPage=5
+document.addEventListener("DOMContentLoaded", function() {
+    const bookListElement = document.getElementById("book-list");
+    const searchInput = document.getElementById("search");
+    const sortSelect = document.getElementById("sort");
+    const filterButton = document.getElementById("filter");
+    const paginationElement = document.getElementById("pagination");
+    const errorMessageElement = document.getElementById("error-message");
 
-const fetchbookss=document.querySelector('#fetchbooks')
-let mainContainer=document.querySelector('#books-container')
-let paginationcontainer=document.querySelector('#pagination-container')
-let searchingInput=document.querySelector('#search')
-let sortingItem=document.querySelector('#sorting')
+    let books = [];
+    let filteredBooks = [];
+    let currentPage = 1;
+    const booksPerPage = 6;
 
-
-fetchbookss.addEventListener('click',async()=>{
-await fetch('https://api.nytimes.com/svc/books/v3/lists/2019-01-20/hardcover-fiction.json?api-key=QTd4H7HDVpLKhqIqtV42NmAthrt8ub4b')
-.then((response)=>response.json())
-.then((data)=>booklist=data.results.books)
-.catch((error)=>console.error(error))
-displayBooks()
-})
-
-function displayBooks(){
-    mainContainer.innerHTML=""
-    let filteredBooks=booklist.filter(book=>book.title.toLowerCase().includes(searchingInput.value.toLowerCase()))
-
-if(sortingItem.value=='asc'){
-    filteredBooks.sort((a, b)=>a.title.localeCompare(b.title))
-}
-else{
-    filteredBooks.sort((a, b) => b.title.localeCompare(a.title));
-}
-
-let paginatedBooks=filteredBooks.slice((currentPage-1)*itemsPerPage,(currentPage*itemsPerPage))
-
-for(let i=0;i<paginatedBooks.length;i++){
-    let bookimg=document.createElement('img')
-    bookimg.src=paginatedBooks[i].book_image
-    bookimg.height=100
-    bookimg.width=100
-
-    let title=document.createElement('div')
-    title.textContent=paginatedBooks[i].title
-
-    let description=document.createElement('div')
-    description.textContent=paginatedBooks[i].description
-
-    let container=document.createElement('div')
-    container.appendChild(bookimg)
-    container.appendChild(title)
-    container.appendChild(description)
-    mainContainer.appendChild(container)
-}
-displayPagination(filteredBooks.length)
-
-}
-
-searchingInput.addEventListener('input',()=>{
-    currentPage=1
-    displayBooks()
-})
-
-sortingItem.addEventListener('change',()=>{
-    displayBooks()
-})
-
-function displayPagination(totalItems) {
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const paginationcontainer = document.querySelector('#pagination-container');
-    paginationcontainer.innerHTML = "";
-
-    for (let i = 1; i <= totalPages; i++) {
-        let pageButton = document.createElement('button');
-        pageButton.textContent = i;
-        pageButton.addEventListener('click', () => {
-            currentPage = i;
-            displayBooks();
-        });
-        paginationcontainer.appendChild(pageButton);
+    // Fetch books from JSON
+    function fetchBooks() {
+        fetch('books.json') // Replace with your JSON file or API endpoint
+            .then(response => response.json())
+            .then(data => {
+                books = data;
+                filteredBooks = books;
+                displayBooks();
+                setupPagination();
+            })
+            .catch(error => {
+                errorMessageElement.textContent = "Error fetching books. Please try again.";
+            });
     }
-}
+
+    // Display books
+    function displayBooks() {
+        bookListElement.innerHTML = '';
+        const startIndex = (currentPage - 1) * booksPerPage;
+        const endIndex = startIndex + booksPerPage;
+        const booksToDisplay = filteredBooks.slice(startIndex, endIndex);
+
+        booksToDisplay.forEach(book => {
+            const bookItem = document.createElement("div");
+            bookItem.classList.add("book-item");
+            bookItem.innerHTML = `<h3>${book.title}</h3><p>${book.author}</p><p>${book.year}</p>`;
+            bookListElement.appendChild(bookItem);
+        });
+    }
+
+    // Setup pagination
+    function setupPagination() {
+        const pageCount = Math.ceil(filteredBooks.length / booksPerPage);
+        paginationElement.innerHTML = '';
+
+        for (let i = 1; i <= pageCount; i++) {
+            const pageItem = document.createElement("button");
+            pageItem.textContent = i;
+            if (i === currentPage) {
+                pageItem.classList.add("active");
+            }
+            pageItem.addEventListener("click", function() {
+                currentPage = i;
+                displayBooks();
+            });
+            paginationElement.appendChild(pageItem);
+        }
+    }
+
+    // Filter and sort books
+    function filterAndSortBooks() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const sortBy = sortSelect.value;
+
+        filteredBooks = books.filter(book => book.title.toLowerCase().includes(searchTerm));
+
+        if (sortBy === 'title') {
+            filteredBooks.sort((a, b) => a.title.localeCompare(b.title));
+        } else if (sortBy === 'author') {
+            filteredBooks.sort((a, b) => a.author.localeCompare(b.author));
+        } else if (sortBy === 'year') {
+            filteredBooks.sort((a, b) => a.year - b.year);
+        }
+
+        currentPage = 1; // Reset to the first page
+        displayBooks();
+        setupPagination();
+    }
+
+    filterButton.addEventListener("click", filterAndSortBooks);
+
+    fetchBooks();
+});
