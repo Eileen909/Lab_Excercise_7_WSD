@@ -3,25 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Catalogue</title>
     <link rel="stylesheet" href="index.css">
+    <title>Fictional Book Catalogue</title>
 </head>
 <body>
-    <div class="container">
-        <h1>Book Catalogue</h1>
-        <div id="controls">
-            <input type="text" id="search" placeholder="Search by title...">
-            <select id="sort">
-                <option value="title">Sort by Title</option>
-                <option value="author">Sort by Author</option>
-                <option value="year">Sort by Year</option>
-            </select>
-            <button id="filter">Filter</button>
+
+    <nav>
+        <ul>
+            <li><a href="#">HOME</a></li>
+            <li><a href="#">RESERVE</a></li>
+            <li><a href="#">RETURN</a></li>
+        </ul>
+    </nav>
+
+        <button id="fetchbooks">Fetch Books</button>
+        <input type="text" placeholder="Search book Name" id="search">
+        <select id="sorting">
+            <option value="asc">Name Ascending</option>
+            <option value="desc"> Name Descending</option>
+        </select>
+        <div id="books-container">
+
         </div>
-        <div id="book-list"></div>
-        <div id="pagination"></div>
-        <div id="error-message"></div>
-    </div>
-    <script src="script.js"></script>
+        <div id="pagination-container">
+
+        </div>
+        <script src="script.js"></script>
 </body>
 </html>
